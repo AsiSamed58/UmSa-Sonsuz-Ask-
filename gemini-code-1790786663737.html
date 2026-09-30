@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UmSa - Bizim Hikayemiz</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Montserrat:wght@400;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --accent-color: #e57373;
+      --pink-color: #f48fb1;
+      --text-color: #ffffff;
+      --text-sub: #b0bec5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Mobil Ekran Çerçevesi Öykünmesi */
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      max-height: 900px;
+      background-color: var(--bg-color);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    @media (min-width: 500px) {
+      .app-container {
+        height: 90vh;
+        border-radius: 30px;
+        border: 2px solid rgba(255,255,255,0.1);
+      }
+    }
+
+    /* KİLİT EKRANI */
+    #lock-screen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #1f1c2c 0%, #928dab 100%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .heart-icon {
+      font-size: 80px;
+      color: var(--accent-color);
+      margin-bottom: 15px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .lock-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      margin-bottom: 5px;
+    }
+
+    .lock-subtitle {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 30px;
+    }
+
+    .pin-input {
+      width: 200px;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: 6px;
+      outline: none;
+    }
+
+    .error-msg {
+      color: #ff5252;
+      font-size: 13px;
+      margin-top: 10px;
+      height: 18px;
+    }
+
+    /* MODAL (HOŞ GELDİN) */
+    .modal {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 101;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #2c2c2c;
+      padding: 25px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 320px;
+    }
+
+    .modal-content h3 {
+      font-family: 'Caveat', cursive;
+      font-size: 28px;
+      color: var(--pink-color);
+      margin-bottom: 15px;
+    }
+
+    .modal-content p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* ANA İÇERİK */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      padding-bottom: 80px;
+    }
+
+    .tab-page {
+      display: none;
+    }
+
+    .tab-page.active {
+      display: block;
+    }
+
+    /* SAYAÇ SAYFASI */
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--pink-color);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .counter-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      margin-bottom: 25px;
+    }
+
+    .counter-row {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+
+    .live-seconds {
+      font-family: monospace;
+      font-size: 20px;
+      color: var(--accent-color);
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .quote-text {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      text-align: center;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.4;
+    }
+
+    /* KUPONLAR SAYFASI */
+    .coupon-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .coupon-card.used {
+      opacity: 0.5;
+    }
+
+    .coupon-card.used .coupon-title {
+      text-decoration: line-through;
+    }
+
+    .coupon-info h4 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .coupon-info p {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .btn-coupon {
+      background: var(--pink-color);
+      color: #000;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    .add-btn {
+      background: var(--accent-color);
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: #fff;
+      cursor: pointer;
+      margin: 10px auto;
+    }
+
+    /* MÜZİK VE MEKTUP SAYFASI */
+    .song-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .song-card i {
+      font-size: 20px;
+      color: var(--pink-color);
+    }
+
+    .letter-box {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(229, 115, 113, 0.3);
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      line-height: 1.6;
+      white-space: pre-line;
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ALT MENÜ (5 PARÇA) */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: #181818;
+      display: flex;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      font-size: 11px;
+      gap: 4px;
+    }
+
+    .nav-item.active {
+      color: var(--accent-color);
+    }
+
+    .nav-item i {
+      font-size: 18px;
+    }
+
+    .nav-divider {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .dot {
+      width: 4px;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- KİLİT EKRANI -->
+    <div id="lock-screen">
+      <i class="fa-solid fa-heart heart-icon"></i>
+      <h2 class="lock-title">Bizim Hikayemiz</h2>
+      <p class="lock-subtitle">UmSa</p>
+      <input type="password" id="pin-input" class="pin-input" placeholder="******" maxlength="6" oninput="checkPin()">
+      <div id="error-msg" class="error-msg"></div>
+    </div>
+
+    <!-- HOŞ GELDİN MODAL -->
+    <div id="welcome-modal" class="modal">
+      <div class="modal-content">
+        <h3>Hoş Geldin Sevgilim!</h3>
+        <p>Senelerimizi tek bir uygulamaya sığdırmak imkansızdı ama en güzel anlarımızı buraya topladım. Hoş geldin sevgilim!</p>
+        <button class="btn" onclick="closeModal()">Hikayemize Başla</button>
+      </div>
+    </div>
+
+    <!-- ANA İÇERİK EKRANLARI -->
+    <div class="main-content">
+      
+      <!-- SAYAÇ SAYFASI -->
+      <div id="page-counter" class="tab-page active">
+        <h3 class="page-title">"Birlikte Geçen Her Anın Değeri..."</h3>
+        <div class="counter-card">
+          <div class="counter-row" id="years-months-days">0 Yıl | 0 Ay | 0 Gün</div>
+          <div class="counter-row" id="hours-minutes" style="color: var(--text-sub); font-size: 15px;">0 Saat | 0 Dakika</div>
+          <div class="live-seconds">
+            <i class="fa-regular fa-clock"></i> Canlı Saniye: <span id="seconds">0</span>
+          </div>
+        </div>
+        <p class="quote-text">"Birlikte güldüğümüz, büyüdüğümüz ve paylaştığımız her saniye için teşekkür ederim."</p>
+      </div>
+
+      <!-- KUPONLAR SAYFASI -->
+      <div id="page-coupons" class="tab-page">
+        <h3 class="page-title" style="margin-bottom: 15px;">Aşk Kuponları</h3>
+        <div id="coupons-list">
+          <!-- Varsayılan Kuponlar -->
+          <div class="coupon-card">
+            <div class="coupon-info">
+              <h4>Sinema Gecesi</h4>
+              <p>İstediğin filmi seçme ve mısır benden!</p>
+            </div>
+            <button class="btn btn-coupon" onclick="toggleCoupon(this)">Kullan</button>
+          </div>
+        </div>
+        <div class="add-btn" onclick="addCoupon()"><i class="fa-solid fa-plus"></i></div>
+      </div>
+
+      <!-- MÜZİK VE MEKTUP SAYFASI -->
+      <div id="page-music" class="tab-page">
+        <div style="display:flex; justify-shadow: space-between; align-items:center; margin-bottom: 15px;">
+          <h3 style="font-family: 'Playfair Display', serif; font-size: 18px;">Müzik Kutumuz</h3>
+          <i class="fa-solid fa-plus" style="color: var(--accent-color); cursor: pointer;" onclick="addSong()"></i>
+        </div>
+        
+        <div id="playlist">
+          <a href="https://open.spotify.com/search/eda%20baba%20her%20sey%20seninle%20guzel" target="_blank" class="song-card">
+            <i class="fa-solid fa-music"></i>
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size: 14px;">Her Şey Seninle Güzel</div>
+              <div style="font-size:12px; color: var(--text-sub);">Eda Baba</div>
+            </div>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:12px; color: #888;"></i>
+          </a>
+        </div>
+
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 18px; margin: 25px 0 15px 0;">Sana Mektubum</h3>
+        <div class="letter-box">
+Sevgilim,
+
+4. yılımız boyunca hayatıma kattığın tüm güzellikler, kahkahalar ve huzur için sana minnettarım. Birlikte büyümek, hayatı seninle paylaşmak benim için en büyük şans.
+
+Bu uygulama, telefonunda her zaman küçük bir anı olarak kalsın; tıpkı senin kalbimde her zaman özel bir yere sahip olduğun gibi.
+
+Yıl Dönümümüz kutlu olsun, seni çok seviyorum!
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ALT MENÜ (5 Parçalı Düzen) -->
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchTab(0)">
+        <i class="fa-solid fa-stopwatch"></i>
+        <span>Sayaç</span>
+      </div>
+      <div class="nav-item" onclick="switchTab(1)">
+        <i class="fa-solid fa-ticket"></i>
+        <span>Kuponlar</span>
+      </div>
+      <div class="nav-divider"><div class="dot"></div></div>
+      <div class="nav-divider"><div class="dot"></div></div>
+      <div class="nav-item" onclick="switchTab(2)">
+        <i class="fa-solid fa-compact-disc"></i>
+        <span>Müzik & Mektup</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ŞİFRE KONTROLÜ
+    function checkPin() {
+      const pin = document.getElementById('pin-input').value;
+      const errorMsg = document.getElementById('error-msg');
+      
+      if (pin.length === 6) {
+        if (pin === "201222") {
+          errorMsg.innerText = "";
+          document.getElementById('welcome-modal').style.display = 'flex';
+        } else {
+          errorMsg.innerText = "Hatalı tarih! Tekrar deneyin.";
+        }
+      } else {
+        errorMsg.innerText = "";
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('welcome-modal').style.display = 'none';
+      document.getElementById('lock-screen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('lock-screen').style.display = 'none';
+      }, 500);
+    }
+
+    // TAB GEÇİŞLERİ
+    function switchTab(index) {
+      const pages = document.querySelectorAll('.tab-page');
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      pages.forEach(p => p.classList.remove('active'));
+      navItems.forEach(n => n.classList.remove('active'));
+
+      pages[index].classList.add('active');
+      navItems[index].classList.add('active');
+    }
+
+    // CANLI SAYAÇ (20.12.2022)
+    const startDate = new Date(2022, 11, 20); // Ay indexi 0-11 arası (11 = Aralık)
+
+    function updateCounter() {
+      const now = new Date();
+      const diffMs = now - startDate;
+
+      const secondsTotal = Math.floor(diffMs / 1000);
+      const minutesTotal = Math.floor(secondsTotal / 60);
+      const hoursTotal = Math.floor(minutesTotal / 60);
+      const daysTotal = Math.floor(hoursTotal / 24);
+
+      const years = Math.floor(daysTotal / 365);
+      const months = Math.floor(daysTotal / 30);
+
+      document.getElementById('years-months-days').innerText = `${years} Yıl | ${months} Ay | ${daysTotal.toLocaleString('tr-TR')} Gün`;
+      document.getElementById('hours-minutes').innerText = `${hoursTotal.toLocaleString('tr-TR')} Saat | ${minutesTotal.toLocaleString('tr-TR')} Dakika`;
+      document.getElementById('seconds').innerText = (secondsTotal % 60).toString().padStart(2, '0');
+    }
+
+    setInterval(updateCounter, 1000);
+    updateCounter();
+
+    // KUPON EKLEME & KULLANMA
+    function toggleCoupon(btn) {
+      const card = btn.closest('.coupon-card');
+      card.classList.toggle('used');
+      btn.innerText = card.classList.contains('used') ? "Kullanıldı" : "Kullan";
+    }
+
+    function addCoupon() {
+      const title = prompt("Kupon Başlığı:");
+      const activity = prompt("Aktivite / Hediye:");
+      if (title && activity) {
+        const list = document.getElementById('coupons-list');
+        const card = document.createElement('div');
+        card.className = 'coupon-card';
+        card.innerHTML = `
+          <div class="coupon-info">
+            <h4>${title}</h4>
+            <p>${activity}</p>
+          </div>
+          <button class="btn btn-coupon" onclick="toggleCoupon(this)">Kullan</button>
+        `;
+        list.appendChild(card);
+      }
+    }
+
+    // ŞARKI EKLEME
+    function addSong() {
+      const title = prompt("Şarkı Adı:");
+      const artist = prompt("Sanatçı:");
+      const link = prompt("Spotify veya YouTube Bağlantı Linki:");
+      if (title && link) {
+        const playlist = document.getElementById('playlist');
+        const a = document.createElement('a');
+        a.href = link;
+        a.target = "_blank";
+        a.className = "song-card";
+        a.innerHTML = `
+          <i class="fa-solid fa-music"></i>
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size: 14px;">${title}</div>
+            <div style="font-size:12px; color: var(--text-sub);">${artist || ''}</div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:12px; color: #888;"></i>
+        `;
+        playlist.appendChild(a);
+      }
+    }
+  </script>
+</body>
+</html>
